@@ -1,0 +1,427 @@
+{
+  "info": {
+    "name": "E-commerce API",
+    "description": "Collection for testing the E-commerce API endpoints. The server automatically seeds 5 sample products (Smartphone X, Running Shoes, Coffee Maker, Laptop Pro, Wireless Earbuds) on startup if no products exist in the database.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "User authentication endpoints",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Register a new user account"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Authenticate a user and receive a token"
+          },
+          "response": [
+            {
+              "name": "Successful Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "login"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Retrieve authenticated user's profile information"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "description": "Product-related endpoints. The server automatically seeds 5 sample products on startup if no products exist.",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "electronics",
+                  "description": "Optional filter by category",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieve a list of all products, optionally filtered by category. Default seeded categories include: Electronics, Sports, and Home.",
+            "response": [
+              {
+                "name": "Sample Products",
+                "originalRequest": {
+                  "method": "GET",
+                  "header": [],
+                  "url": {
+                    "raw": "{{base_url}}/products",
+                    "host": ["{{base_url}}"],
+                    "path": ["products"]
+                  }
+                },
+                "status": "OK",
+                "code": 200,
+                "_postman_previewlanguage": "json",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "cookie": [],
+                "body": "[\n  {\n    \"id\": \"sample-id-1\",\n    \"name\": \"Smartphone X\",\n    \"description\": \"Latest smartphone with advanced features\",\n    \"price\": 999.99,\n    \"category\": \"Electronics\",\n    \"image\": \"https://example.com/images/smartphone-x.jpg\",\n    \"available\": true,\n    \"createdAt\": \"2023-01-01T00:00:00.000Z\"\n  },\n  {\n    \"id\": \"sample-id-2\",\n    \"name\": \"Running Shoes\",\n    \"description\": \"Comfortable running shoes for professional athletes\",\n    \"price\": 129.99,\n    \"category\": \"Sports\",\n    \"image\": \"https://example.com/images/running-shoes.jpg\",\n    \"available\": true,\n    \"createdAt\": \"2023-01-01T00:00:00.000Z\"\n  },\n  {\n    \"id\": \"sample-id-3\",\n    \"name\": \"Coffee Maker\",\n    \"description\": \"Automatic coffee maker with timer\",\n    \"price\": 89.99,\n    \"category\": \"Home\",\n    \"image\": \"https://example.com/images/coffee-maker.jpg\",\n    \"available\": true,\n    \"createdAt\": \"2023-01-01T00:00:00.000Z\"\n  }\n]"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get Products by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?category=Electronics",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "Electronics",
+                  "description": "Filter by category"
+                }
+              ]
+            },
+            "description": "Retrieve products filtered by category. Seeded categories include: Electronics, Sports, and Home."
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "{{product_id}}"]
+            },
+            "description": "Retrieve detailed information about a specific product"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "description": "Shopping cart endpoints",
+      "item": [
+        {
+          "name": "Get User Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart",
+              "host": ["{{base_url}}"],
+              "path": ["cart"]
+            },
+            "description": "Retrieve the current user's shopping cart"
+          }
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart/add",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "add"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{product_id}}\",\n  \"quantity\": 1\n}"
+            },
+            "description": "Add a product to the user's shopping cart"
+          }
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart/{{cart_item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "{{cart_item_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}"
+            },
+            "description": "Update the quantity of an item in the cart"
+          }
+        },
+        {
+          "name": "Remove Item from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart/{{cart_item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "{{cart_item_id}}"]
+            },
+            "description": "Remove a specific item from the cart"
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart",
+              "host": ["{{base_url}}"],
+              "path": ["cart"]
+            },
+            "description": "Remove all items from the user's cart"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Order management endpoints",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddress\": \"123 Main St, City, Country\",\n  \"paymentMethod\": \"credit_card\"\n}"
+            },
+            "description": "Create a new order using the items in the user's cart"
+          }
+        },
+        {
+          "name": "Get User Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            },
+            "description": "Retrieve a list of all orders placed by the current user"
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}"]
+            },
+            "description": "Retrieve detailed information about a specific order"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Base",
+      "description": "Base API endpoints",
+      "item": [
+        {
+          "name": "Root Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            },
+            "description": "Simple hello message from the API"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Base URL for the API"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string",
+      "description": "Authentication token received after login"
+    },
+    {
+      "key": "product_id",
+      "value": "",
+      "type": "string",
+      "description": "UUID of a product"
+    },
+    {
+      "key": "cart_item_id",
+      "value": "",
+      "type": "string",
+      "description": "UUID of a cart item"
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "string",
+      "description": "UUID of an order"
+    }
+  ]
+} 

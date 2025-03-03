@@ -1,25 +1,26 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { OrdersService } from './orders.service';
+import { SimpleAuthGuard } from '../auth/guards/simple-auth.guard';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { SupabaseAuthGuard } from '../supabase/guards/supabase-auth.guard';
 
-@UseGuards(SupabaseAuthGuard)
 @Controller('orders')
+@UseGuards(SimpleAuthGuard)
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private ordersService: OrdersService) {}
 
   @Post()
-  async createOrder(@Body() createOrderDto: CreateOrderDto) {
+  createOrder(@Body() createOrderDto: CreateOrderDto, @Req() req) {
+    createOrderDto.userId = req.user.id;
     return this.ordersService.createOrder(createOrderDto);
   }
 
-  @Get('user/:userId')
-  async getUserOrders(@Param('userId') userId: string) {
-    return this.ordersService.getUserOrders(userId);
+  @Get()
+  getUserOrders(@Req() req) {
+    return this.ordersService.getUserOrders(req.user.id);
   }
 
   @Get(':id')
-  async getOrderById(@Param('id') id: string) {
+  getOrderById(@Param('id') id: string) {
     return this.ordersService.getOrderById(id);
   }
 } 

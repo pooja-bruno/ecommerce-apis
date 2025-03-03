@@ -1,39 +1,40 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Req, Put } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
-import { SupabaseAuthGuard } from '../supabase/guards/supabase-auth.guard';
+import { SimpleAuthGuard } from '../auth/guards/simple-auth.guard';
 
-@UseGuards(SupabaseAuthGuard)
 @Controller('cart')
+@UseGuards(SimpleAuthGuard)
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get()
-  async getCart(@Param('userId') userId: string) {
-    return this.cartService.getCart(userId);
+  getCart(@Req() req) {
+    return this.cartService.getCart(req.user.id);
   }
 
   @Post('add')
-  async addToCart(@Body() addToCartDto: AddToCartDto) {
+  addToCart(@Body() addToCartDto: AddToCartDto, @Req() req) {
+    addToCartDto.userId = req.user.id;
     return this.cartService.addToCart(addToCartDto);
   }
 
-  @Post('update/:itemId')
-  async updateCartItem(
-    @Param('itemId') itemId: string,
-    @Body() updateCartItemDto: UpdateCartItemDto,
+  @Put(':id')
+  updateCartItem(
+    @Param('id') itemId: string,
+    @Body() updateCartItemDto: UpdateCartItemDto
   ) {
     return this.cartService.updateCartItem(itemId, updateCartItemDto);
   }
 
-  @Delete('remove/:itemId')
-  async removeFromCart(@Param('itemId') itemId: string) {
+  @Delete(':id')
+  removeFromCart(@Param('id') itemId: string) {
     return this.cartService.removeFromCart(itemId);
   }
 
-  @Delete('clear/:userId')
-  async clearCart(@Param('userId') userId: string) {
-    return this.cartService.clearCart(userId);
+  @Delete()
+  clearCart(@Req() req) {
+    return this.cartService.clearCart(req.user.id);
   }
 } 

@@ -1,149 +1,91 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { SupabaseService } from '../supabase/supabase.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
-import { v4 as uuidv4 } from 'uuid';
+import { CartItem } from './entities/cart-item.entity';
+import { Product } from '../products/entities/product.entity';
 
 @Injectable()
 export class CartService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    @InjectRepository(CartItem)
+    private cartItemRepository: Repository<CartItem>,
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>
+  ) {}
 
   async getCart(userId: string) {
-    const supabase = this.supabaseService.getClient();
+    const cartItems = await this.cartItemRepository.find({
+      where: { userId },
+      relations: ['product'],
+    });
     
-    const { data, error } = await supabase
-      .from('ecommerce_cart_items')
-      .select(`
-        *,
-        product:ecommerce_products(*)
-      `)
-      .eq('user_id', userId);
-    
-    if (error) {
-      throw new Error(`Error fetching cart: ${error.message}`);
-    }
-    
-    return data;
+    return cartItems;
   }
 
   async addToCart(addToCartDto: AddToCartDto) {
-    const supabase = this.supabaseService.getClient();
-    
     // Check if product exists
-    const { data: product, error: productError } = await supabase
-      .from('ecommerce_products')
-      .select('id, stock')
-      .eq('id', addToCartDto.productId)
-      .single();
+    const product = await this.productRepository.findOne({
+      where: { id: addToCartDto.productId }
+    });
     
-    if (productError || !product) {
+    if (!product) {
       throw new NotFoundException(`Product not found`);
     }
     
-    // Check if product is in stock
-    if (product.stock !== null && product.stock < addToCartDto.quantity) {
-      throw new Error(`Not enough stock available`);
-    }
-    
     // Check if item already exists in cart
-    const { data: existingItem, error: existingItemError } = await supabase
-      .from('ecommerce_cart_items')
-      .select('*')
-      .eq('user_id', addToCartDto.userId)
-      .eq('product_id', addToCartDto.productId)
-      .single();
+    const existingItem = await this.cartItemRepository.findOne({
+      where: {
+        userId: addToCartDto.userId,
+        productId: addToCartDto.productId,
+      }
+    });
     
     if (existingItem) {
       // Update quantity if item already exists
       const newQuantity = existingItem.quantity + addToCartDto.quantity;
       
-      const { data, error } = await supabase
-        .from('ecommerce_cart_items')
-        .update({ quantity: newQuantity, updated_at: new Date().toISOString() })
-        .eq('id', existingItem.id)
-        .select()
-        .single();
-      
-      if (error) {
-        throw new Error(`Error updating cart item: ${error.message}`);
-      }
-      
-      return data;
+      existingItem.quantity = newQuantity;
+      return this.cartItemRepository.save(existingItem);
     } else {
       // Add new item to cart
-      const cartItemId = uuidv4();
+      const cartItem = this.cartItemRepository.create({
+        userId: addToCartDto.userId,
+        productId: addToCartDto.productId,
+        quantity: addToCartDto.quantity,
+      });
       
-      const { data, error } = await supabase
-        .from('ecommerce_cart_items')
-        .insert({
-          id: cartItemId,
-          user_id: addToCartDto.userId,
-          product_id: addToCartDto.productId,
-          quantity: addToCartDto.quantity,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      
-      if (error) {
-        throw new Error(`Error adding to cart: ${error.message}`);
-      }
-      
-      return data;
+      return this.cartItemRepository.save(cartItem);
     }
   }
 
   async updateCartItem(itemId: string, updateCartItemDto: UpdateCartItemDto) {
-    const supabase = this.supabaseService.getClient();
+    const cartItem = await this.cartItemRepository.findOne({
+      where: { id: itemId }
+    });
     
-    const { data, error } = await supabase
-      .from('ecommerce_cart_items')
-      .update({
-        quantity: updateCartItemDto.quantity,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', itemId)
-      .select()
-      .single();
-    
-    if (error) {
-      throw new Error(`Error updating cart item: ${error.message}`);
-    }
-    
-    if (!data) {
+    if (!cartItem) {
       throw new NotFoundException(`Cart item not found`);
     }
     
-    return data;
+    cartItem.quantity = updateCartItemDto.quantity;
+    
+    return this.cartItemRepository.save(cartItem);
   }
 
   async removeFromCart(itemId: string) {
-    const supabase = this.supabaseService.getClient();
+    const result = await this.cartItemRepository.delete(itemId);
     
-    const { error } = await supabase
-      .from('ecommerce_cart_items')
-      .delete()
-      .eq('id', itemId);
-    
-    if (error) {
-      throw new Error(`Error removing from cart: ${error.message}`);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Cart item not found`);
     }
     
     return { message: 'Item removed from cart' };
   }
 
   async clearCart(userId: string) {
-    const supabase = this.supabaseService.getClient();
-    
-    const { error } = await supabase
-      .from('ecommerce_cart_items')
-      .delete()
-      .eq('user_id', userId);
-    
-    if (error) {
-      throw new Error(`Error clearing cart: ${error.message}`);
-    }
+    await this.cartItemRepository.delete({ userId });
     
     return { message: 'Cart cleared successfully' };
   }
