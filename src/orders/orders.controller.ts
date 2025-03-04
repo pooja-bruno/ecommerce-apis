@@ -10,8 +10,7 @@ export class OrdersController {
 
   @Post()
   createOrder(@Body() createOrderDto: CreateOrderDto, @Req() req) {
-    createOrderDto.userId = req.user.id;
-    return this.ordersService.createOrder(createOrderDto);
+    return this.ordersService.createOrder(createOrderDto, req.user.id);
   }
 
   @Get()

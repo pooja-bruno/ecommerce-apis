@@ -29,7 +29,29 @@
               "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
             },
             "description": "Register a new user account"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Check if the request was successful",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    // Parse the response body",
+                  "    var jsonData = pm.response.json();",
+                  "    ",
+                  "    // Check if token exists in the response",
+                  "    if (jsonData.token) {",
+                  "        // Set the auth_token environment variable",
+                  "        pm.environment.set('auth_token', jsonData.token);",
+                  "        console.log('Auth token saved to environment from registration');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Login",
@@ -52,38 +74,26 @@
             },
             "description": "Authenticate a user and receive a token"
           },
-          "response": [
+          "event": [
             {
-              "name": "Successful Login",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/auth/login",
-                  "host": ["{{base_url}}"],
-                  "path": ["auth", "login"]
-                },
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\"\n  }\n}"
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Check if the request was successful",
+                  "if (pm.response.code === 200) {",
+                  "    // Parse the response body",
+                  "    var jsonData = pm.response.json();",
+                  "    ",
+                  "    // Check if token exists in the response",
+                  "    if (jsonData.token) {",
+                  "        // Set the auth_token environment variable",
+                  "        pm.environment.set('auth_token', jsonData.token);",
+                  "        console.log('Auth token saved to environment from login');",
+                  "    }",
+                  "}"
+                ]
+              }
             }
           ]
         },
@@ -130,6 +140,28 @@
               ]
             },
             "description": "Retrieve a list of all products, optionally filtered by category. Default seeded categories include: Electronics, Sports, and Home.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "// Check if the request was successful",
+                    "if (pm.response.code === 200) {",
+                    "    // Parse the response body",
+                    "    var jsonData = pm.response.json();",
+                    "    ",
+                    "    // Check if there are products in the response",
+                    "    if (jsonData && jsonData.length > 0) {",
+                    "        // Store the first product's ID in the environment",
+                    "        pm.environment.set('product_id', jsonData[0].id);",
+                    "        console.log('First product ID saved to environment: ' + jsonData[0].id);",
+                    "    }",
+                    "}"
+                  ]
+                }
+              }
+            ],
             "response": [
               {
                 "name": "Sample Products",
@@ -174,7 +206,29 @@
                 }
               ]
             },
-            "description": "Retrieve products filtered by category. Seeded categories include: Electronics, Sports, and Home."
+            "description": "Retrieve products filtered by category. Seeded categories include: Electronics, Sports, and Home.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "// Check if the request was successful",
+                    "if (pm.response.code === 200) {",
+                    "    // Parse the response body",
+                    "    var jsonData = pm.response.json();",
+                    "    ",
+                    "    // Check if there are products in the response",
+                    "    if (jsonData && jsonData.length > 0) {",
+                    "        // Store the first product's ID in the environment",
+                    "        pm.environment.set('product_id', jsonData[0].id);",
+                    "        console.log('First product ID from category saved to environment: ' + jsonData[0].id);",
+                    "    }",
+                    "}"
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -238,7 +292,29 @@
               "raw": "{\n  \"productId\": \"{{product_id}}\",\n  \"quantity\": 1\n}"
             },
             "description": "Add a product to the user's shopping cart"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Check if the request was successful",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    // Parse the response body",
+                  "    var jsonData = pm.response.json();",
+                  "    ",
+                  "    // Check if the cart item has an ID",
+                  "    if (jsonData && jsonData.id) {",
+                  "        // Store the cart item ID in the environment",
+                  "        pm.environment.set('cart_item_id', jsonData.id);",
+                  "        console.log('Cart item ID saved to environment: ' + jsonData.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Cart Item",
@@ -332,7 +408,29 @@
               "raw": "{\n  \"shippingAddress\": \"123 Main St, City, Country\",\n  \"paymentMethod\": \"credit_card\"\n}"
             },
             "description": "Create a new order using the items in the user's cart"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Check if the request was successful",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    // Parse the response body",
+                  "    var jsonData = pm.response.json();",
+                  "    ",
+                  "    // Check if the order has an ID",
+                  "    if (jsonData && jsonData.id) {",
+                  "        // Store the order ID in the environment",
+                  "        pm.environment.set('order_id', jsonData.id);",
+                  "        console.log('Order ID saved to environment: ' + jsonData.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get User Orders",
@@ -395,7 +493,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:3000",
+      "value": "http://localhost:3001",
       "type": "string",
       "description": "Base URL for the API"
     },

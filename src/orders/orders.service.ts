@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CartService } from '../cart/cart.service';
@@ -19,47 +19,55 @@ export class OrdersService {
     private cartService: CartService,
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderDto) {
-    // Get cart items
-    const cartItems = await this.cartService.getCart(createOrderDto.userId);
+  async createOrder(createOrderDto: CreateOrderDto, userId: string) {
+    // Get the user's cart
+    const cartItems = await this.cartService.getCart(userId);
     
     if (!cartItems || cartItems.length === 0) {
-      throw new Error('Cart is empty');
+      throw new BadRequestException('Cannot create order with empty cart');
     }
     
-    // Calculate total
-    let total = 0;
-    for (const item of cartItems) {
-      total += item.product.price * item.quantity;
-    }
-    
-    // Create order
+    // Create a new order
     const order = this.orderRepository.create({
-      userId: createOrderDto.userId,
-      total,
-      status: 'pending',
+      userId: userId,
       shippingAddress: createOrderDto.shippingAddress,
       paymentMethod: createOrderDto.paymentMethod,
+      status: 'pending',
+      total: 0, // Will calculate below
     });
     
+    // Save the order to get an ID
     const savedOrder = await this.orderRepository.save(order);
     
-    // Create order items
-    const orderItems = await Promise.all(
-      cartItems.map(async (item) => {
-        const orderItem = this.orderItemRepository.create({
-          orderId: savedOrder.id,
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.product.price,
-        });
-        return this.orderItemRepository.save(orderItem);
-      })
-    );
+    // Create order items from cart items
+    let total = 0;
+    // Explicitly type the orderItems array to fix the TypeScript error
+    const orderItems: OrderItem[] = [];
     
-    // Clear cart
-    await this.cartService.clearCart(createOrderDto.userId);
+    for (const cartItem of cartItems) {
+      const orderItem = this.orderItemRepository.create({
+        orderId: savedOrder.id,
+        productId: cartItem.productId,
+        quantity: cartItem.quantity,
+        price: cartItem.product.price,
+      });
+      
+      // Save the order item and add it to the array
+      const savedOrderItem = await this.orderItemRepository.save(orderItem);
+      orderItems.push(savedOrderItem);
+      
+      // Update the total
+      total += cartItem.product.price * cartItem.quantity;
+    }
     
+    // Update order with total
+    savedOrder.total = total;
+    await this.orderRepository.save(savedOrder);
+    
+    // Clear the cart
+    await this.cartService.clearCart(userId);
+    
+    // Return the order with items
     return {
       ...savedOrder,
       items: orderItems,

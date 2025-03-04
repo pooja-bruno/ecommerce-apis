@@ -39,8 +39,10 @@ export class AuthService {
       // Save user to database
       const savedUser = await this.userRepository.save(user);
       
-      // Create a simple token (not secure, just for testing)
-      const token = Buffer.from(`${savedUser.id}:${Date.now()}`).toString('base64');
+      // Create a simple token with just the user ID
+      const token = Buffer.from(savedUser.id).toString('base64');
+      
+      this.logger.log(`Generated token for user ${savedUser.id}`);
       
       return {
         user: {
@@ -77,8 +79,11 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
       }
       
-      // Create a simple token (not secure, just for testing)
-      const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+      // Create a simple token with just the user ID
+      // Make sure it's a clean string representation
+      const token = Buffer.from(user.id).toString('base64');
+      
+      this.logger.log(`Generated token for user ${user.id}`);
       
       return {
         user: {

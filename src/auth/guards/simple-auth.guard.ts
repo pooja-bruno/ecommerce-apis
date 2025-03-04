@@ -1,10 +1,18 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class SimpleAuthGuard implements CanActivate {
-  constructor() {}
+  private readonly logger = new Logger(SimpleAuthGuard.name);
+  
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     
@@ -13,18 +21,27 @@ export class SimpleAuthGuard implements CanActivate {
     }
     
     try {
-      // For development/testing, we'll just decode the token
-      // and set a user ID without verification
-      const decoded = Buffer.from(token, 'base64').toString().split(':');
-      const userId = decoded[0];
+      // Decode the token - now it should just be the base64 encoded user ID
+      const userId = Buffer.from(token, 'base64').toString();
+      
+      this.logger.debug(`Decoded user ID from token: ${userId}`);
+      
+      // Verify the user exists in the database
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      
+      if (!user) {
+        this.logger.warn(`User with ID ${userId} not found in database`);
+        throw new UnauthorizedException('User not found');
+      }
       
       // Add user to request object
       request.user = {
-        id: userId,
+        id: user.id,
       };
       
       return true;
     } catch (err) {
+      this.logger.error(`Token decoding error: ${err.message}`);
       throw new UnauthorizedException('Invalid token');
     }
   }

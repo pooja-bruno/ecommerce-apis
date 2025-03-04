@@ -9,6 +9,6 @@ import { SimpleAuthGuard } from './guards/simple-auth.guard';
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [AuthController],
   providers: [AuthService, SimpleAuthGuard],
-  exports: [AuthService, SimpleAuthGuard],
+  exports: [AuthService, SimpleAuthGuard, TypeOrmModule.forFeature([User])],
 })
 export class AuthModule {} 

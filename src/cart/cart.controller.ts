@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Req, Put } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Req, Put, Logger } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
@@ -7,6 +7,8 @@ import { SimpleAuthGuard } from '../auth/guards/simple-auth.guard';
 @Controller('cart')
 @UseGuards(SimpleAuthGuard)
 export class CartController {
+  private readonly logger = new Logger(CartController.name);
+  
   constructor(private readonly cartService: CartService) {}
 
   @Get()
@@ -16,8 +18,11 @@ export class CartController {
 
   @Post('add')
   addToCart(@Body() addToCartDto: AddToCartDto, @Req() req) {
-    addToCartDto.userId = req.user.id;
-    return this.cartService.addToCart(addToCartDto);
+    // Log the user ID for debugging
+    this.logger.debug(`Adding to cart for user: ${req.user.id}`);
+    
+    // Pass the user ID separately to the service
+    return this.cartService.addToCart(addToCartDto, req.user.id);
   }
 
   @Put(':id')

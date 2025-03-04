@@ -24,7 +24,7 @@ export class CartService {
     return cartItems;
   }
 
-  async addToCart(addToCartDto: AddToCartDto) {
+  async addToCart(addToCartDto: AddToCartDto, userId: string) {
     // Check if product exists
     const product = await this.productRepository.findOne({
       where: { id: addToCartDto.productId }
@@ -37,7 +37,7 @@ export class CartService {
     // Check if item already exists in cart
     const existingItem = await this.cartItemRepository.findOne({
       where: {
-        userId: addToCartDto.userId,
+        userId: userId,
         productId: addToCartDto.productId,
       }
     });
@@ -51,7 +51,7 @@ export class CartService {
     } else {
       // Add new item to cart
       const cartItem = this.cartItemRepository.create({
-        userId: addToCartDto.userId,
+        userId: userId,
         productId: addToCartDto.productId,
         quantity: addToCartDto.quantity,
       });
