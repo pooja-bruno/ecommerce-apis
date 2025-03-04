@@ -1,0 +1,584 @@
+{
+  "name": "E-commerce API",
+  "version": "1",
+  "items": [
+    {
+      "type": "folder",
+      "name": "Authentication",
+      "root": {
+        "docs": "User authentication endpoints",
+        "meta": {
+          "name": "Authentication"
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "Get Profile",
+          "seq": 3,
+          "request": {
+            "url": "{{base_url}}/auth/profile",
+            "method": "GET",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Retrieve authenticated user's profile information",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Login",
+          "seq": 2,
+          "request": {
+            "url": "{{base_url}}/auth/login",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "// Check if the request was successful\nif (res.getStatus() === 200) {\n    // Parse the response body\n    var jsonData = res.getBody();\n    \n    // Check if token exists in the response\n    if (jsonData.token) {\n        // Set the auth_token environment variable\n        bru.setEnvVar('auth_token', jsonData.token);\n        console.log('Auth token saved to environment from login');\n    }\n}",
+            "docs": "Authenticate a user and receive a token",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Register User",
+          "seq": 1,
+          "request": {
+            "url": "{{base_url}}/auth/register",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "// Check if the request was successful\nif (res.getStatus() === 200 || res.getStatus() === 201) {\n  \n  console.log(\"hey\")\n    // Parse the response body\n    var jsonData = res.getBody();\n    \n    // Check if token exists in the response\n    if (jsonData.token) {\n        // Set the auth_token environment variable\n        bru.setEnvVar('auth_token', jsonData.token);\n        console.log('Auth token saved to environment from registration');\n    }\n}\n\nbru.getEnvVar('auth_token')",
+            "docs": "Register a new user account",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Base",
+      "root": {
+        "docs": "Base API endpoints",
+        "meta": {
+          "name": "Base"
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "Root Endpoint",
+          "seq": 1,
+          "request": {
+            "url": "{{base_url}}/",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Simple hello message from the API",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Orders",
+      "root": {
+        "docs": "Order management endpoints",
+        "meta": {
+          "name": "Orders"
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "Get Order by ID",
+          "seq": 3,
+          "request": {
+            "url": "{{base_url}}/orders/{{order_id}}",
+            "method": "GET",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Retrieve detailed information about a specific order",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get User Orders",
+          "seq": 2,
+          "request": {
+            "url": "{{base_url}}/orders",
+            "method": "GET",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Retrieve a list of all orders placed by the current user",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Create Order",
+          "seq": 1,
+          "request": {
+            "url": "{{base_url}}/orders",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json",
+                "enabled": true
+              },
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"shippingAddress\": \"123 Main St, City, Country\",\n  \"paymentMethod\": \"credit_card\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "// Check if the request was successful\nif (res.getStatus() === 200 || res.getStatus() === 201) {\n    // Parse the response body\n    var jsonData = res.getBody();\n    \n    // Check if the order has an ID\n    if (jsonData && jsonData.id) {\n        // Store the order ID in the environment\n        bru.setEnvVar('order_id', jsonData.id);\n        console.log('Order ID saved to environment: ' + jsonData.id);\n    }\n}",
+            "docs": "Create a new order using the items in the user's cart",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Products",
+      "root": {
+        "docs": "Product-related endpoints. The server automatically seeds 5 sample products on startup if no products exist.",
+        "meta": {
+          "name": "Products"
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "Get All Products",
+          "seq": 1,
+          "request": {
+            "url": "{{base_url}}/products",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "category",
+                "value": "electronics",
+                "type": "query",
+                "enabled": false
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Retrieve a list of all products, optionally filtered by category. Default seeded categories include: Electronics, Sports, and Home.",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get Product by ID",
+          "seq": 3,
+          "request": {
+            "url": "{{base_url}}/products/{{product_id}}",
+            "method": "GET",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Retrieve detailed information about a specific product",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get Products by Category",
+          "seq": 2,
+          "request": {
+            "url": "{{base_url}}/products?category=Electronics",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "category",
+                "value": "Electronics",
+                "type": "query",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Retrieve products filtered by category. Seeded categories include: Electronics, Sports, and Home.",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Cart",
+      "root": {
+        "docs": "Shopping cart endpoints",
+        "meta": {
+          "name": "Cart"
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "Add Item to Cart",
+          "seq": 2,
+          "request": {
+            "url": "{{base_url}}/cart/add",
+            "method": "POST",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json",
+                "enabled": true
+              },
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"productId\": \"{{product_id}}\",\n  \"quantity\": 1\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "// Check if the request was successful\nif (res.getStatus() === 200 || res.getStatus() === 201) {\n    // Parse the response body\n    var jsonData = res.getBody();\n    \n    // Check if the cart item has an ID\n    if (jsonData && jsonData.id) {\n        // Store the cart item ID in the environment\n        bru.setEnvVar('cart_item_id', jsonData.id);\n        console.log('Cart item ID saved to environment: ' + jsonData.id);\n    }\n}",
+            "docs": "Add a product to the user's shopping cart",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Clear Cart",
+          "seq": 5,
+          "request": {
+            "url": "{{base_url}}/cart",
+            "method": "DELETE",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Remove all items from the user's cart",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get User Cart",
+          "seq": 1,
+          "request": {
+            "url": "{{base_url}}/cart",
+            "method": "GET",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Retrieve the current user's shopping cart",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Remove Item from Cart",
+          "seq": 4,
+          "request": {
+            "url": "{{base_url}}/cart/{{cart_item_id}}",
+            "method": "DELETE",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Remove a specific item from the cart",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Update Cart Item",
+          "seq": 3,
+          "request": {
+            "url": "{{base_url}}/cart/{{cart_item_id}}",
+            "method": "PUT",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json",
+                "enabled": true
+              },
+              {
+                "name": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "enabled": true
+              }
+            ],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"quantity\": 2\n}",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "Update the quantity of an item in the cart",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "activeEnvironmentUid": "0MChtpljoVT1PVCJCfASf",
+  "environments": [
+    {
+      "variables": [
+        {
+          "name": "auth_token",
+          "value": "YmNiMzcwYjItMWI1OS00Yjk3LThkNGEtYTM0MjZhN2RkMGE3",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        },
+        {
+          "name": "base_url",
+          "value": "http://localhost:3001",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        }
+      ],
+      "name": "dev"
+    }
+  ],
+  "root": {
+    "request": {
+      "auth": {
+        "mode": "none"
+      },
+      "vars": {}
+    },
+    "docs": "Collection for testing the E-commerce API endpoints. The server automatically seeds 5 sample products (Smartphone X, Running Shoes, Coffee Maker, Laptop Pro, Wireless Earbuds) on startup if no products exist in the database.",
+    "meta": {
+      "name": "E-commerce API"
+    }
+  },
+  "brunoConfig": {
+    "version": "1",
+    "name": "E-commerce API",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ]
+  }
+}
